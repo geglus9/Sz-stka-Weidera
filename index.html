@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A6W — Aerobiczna Szóstka Weidera</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17181B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="A6W">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F1EC; --panel:#FFFFFF; --panel-border:#DFDBD1;
+    --text:#201E1B; --text-dim:#6B675F;
+    --accent:#C8862A; --accent-text:#2A1C05;
+    --rest:#2C8E86; --danger:#C1443F; --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17181B; --panel:#1F2126; --panel-border:#2C2F36;
+      --text:#EDE9E1; --text-dim:#9A9CA3;
+      --accent:#E3A43B; --accent-text:#201200;
+      --rest:#3FA7A0; --danger:#D9534F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17181B; --panel:#1F2126; --panel-border:#2C2F36;
+    --text:#EDE9E1; --text-dim:#9A9CA3;
+    --accent:#E3A43B; --accent-text:#201200;
+    --rest:#3FA7A0; --danger:#D9534F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;}
+  #app{max-width:520px;margin:0 auto;padding:20px 18px 44px;}
+  h1,h2,h3{font-family:'Oswald',sans-serif;font-weight:600;margin:0;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .brand{font-family:'Oswald',sans-serif;font-size:21px;font-weight:700;}
+  .brand span{color:var(--accent);}
+  .backbtn{background:none;border:none;color:var(--text-dim);font-size:15px;font-family:'Inter',sans-serif;cursor:pointer;padding:8px 4px;}
+  .backbtn:active{opacity:.6;}
+  .intro{font-size:13px;color:var(--text-dim);line-height:1.5;margin-bottom:14px;}
+
+  .continuecard{background:var(--accent);color:var(--accent-text);border-radius:16px;padding:16px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:16px;}
+  .continuecard .lbl{font-size:12.5px;opacity:.85;}
+  .continuecard .day{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;margin-top:2px;}
+  .continuecard .arrow{font-size:22px;}
+
+  .daysgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+  .daybtn{aspect-ratio:1;border-radius:10px;border:1px solid var(--panel-border);background:var(--panel);color:var(--text);font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;}
+  .daybtn.done{background:var(--accent);border-color:var(--accent);color:var(--accent-text);}
+  .daybtn.current{box-shadow:0 0 0 2px var(--rest) inset;}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--text-dim);margin-top:10px;align-items:center;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px;}
+
+  .exlist{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+  .exrow{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px;}
+  .exicon{width:46px;height:34px;flex-shrink:0;color:var(--accent);}
+  .exinfo{flex:1;min-width:0;}
+  .exname{font-size:14.5px;font-weight:600;line-height:1.3;}
+
+  .settingsbox{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:14px;margin-top:16px;}
+  .settingsbox h3{font-size:14px;margin-bottom:10px;}
+  .setrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;font-size:13.5px;gap:10px;}
+  .setrow .numfield{width:56px;text-align:center;background:var(--bg);border:1px solid var(--panel-border);border-radius:8px;padding:6px 2px;color:var(--text);font-family:'Oswald',sans-serif;font-size:14px;flex-shrink:0;}
+  .setnote{font-size:11.5px;color:var(--text-dim);margin-top:8px;line-height:1.5;}
+
+  .planeditrow{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+  .planeditrow label{font-size:13px;color:var(--text-dim);}
+  .planeditrow .numfield{width:56px;text-align:center;background:var(--panel);border:1px solid var(--panel-border);border-radius:8px;padding:8px 2px;color:var(--text);font-family:'Oswald',sans-serif;font-size:15px;}
+
+  .primarybtn{background:var(--accent);color:var(--accent-text);border:none;border-radius:12px;padding:16px;font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;width:100%;cursor:pointer;margin-top:18px;}
+  .primarybtn:active{opacity:.85;}
+  .ghostbtn{background:none;border:1px solid var(--panel-border);color:var(--text);border-radius:12px;padding:14px;font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;width:100%;cursor:pointer;}
+
+  .stage{background:var(--panel);border:1px solid var(--panel-border);border-radius:20px;padding:22px 20px 22px;margin-top:8px;text-align:center;}
+  .statsrow{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:14px;}
+  .statitem{display:flex;flex-direction:column;align-items:center;}
+  .statval{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+  .statlbl{font-size:9.5px;letter-spacing:.4px;color:var(--text-dim);margin-top:2px;text-transform:uppercase;}
+  .overallwrap{height:4px;border-radius:2px;background:var(--panel-border);overflow:hidden;margin:14px 4px 0;}
+  .overallbar{height:100%;background:var(--accent);width:0%;transition:width .3s linear;}
+  .phaselabel{font-size:13px;color:var(--text-dim);margin-bottom:6px;}
+  .exhero{font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;line-height:1.2;margin-bottom:6px;}
+  .stagesvg{width:130px;height:86px;color:var(--accent);margin:2px auto 4px;}
+  .timerbig{font-family:'Oswald',sans-serif;font-size:60px;font-weight:700;line-height:1;margin:4px 0 2px;font-variant-numeric:tabular-nums;min-height:64px;}
+  .timerbig.work{color:var(--accent);}
+  .timerbig.rest{color:var(--rest);}
+  .timerbig.warn{color:var(--danger);}
+  .timerbig.wordmode{font-size:28px;min-height:34px;}
+  .timerhint{font-size:13px;color:var(--text-dim);min-height:18px;}
+  .ctrlrow{display:flex;gap:10px;margin-top:16px;}
+  .ctrlrow .primarybtn{margin-top:0;}
+  .ctrlrow .ghostbtn{margin-top:0;}
+
+  .progresswrap{display:flex;gap:6px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
+  .progressdot{width:10px;height:10px;border-radius:50%;background:var(--panel-border);}
+  .progressdot.done{background:var(--accent);}
+  .progressdot.current{background:var(--rest);}
+  .serieband,.repband{display:flex;gap:5px;justify-content:center;margin-bottom:4px;flex-wrap:wrap;}
+  .serieband span,.repband span{width:20px;height:4px;border-radius:2px;background:var(--panel-border);}
+  .repband span{width:10px;}
+  .serieband span.done,.repband span.done{background:var(--accent);}
+  .serieband span.current,.repband span.current{background:var(--rest);}
+
+  .donewrap{text-align:center;padding:36px 10px;}
+  .donewrap h2{font-size:24px;margin-bottom:8px;}
+  .donewrap p{color:var(--text-dim);font-size:14.5px;margin-bottom:4px;}
+  ::selection{background:var(--accent);color:var(--accent-text);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- 6 stałych ćwiczeń A6W ---------- */
+const EXERCISES = [
+  {n:"Unoszenie tułowia z jedną nogą ugiętą — dłonie na kolanie", legs:"one-bent", arms:"knee"},
+  {n:"Unoszenie tułowia z obiema nogami ugiętymi — dłonie na kolanach", legs:"two-bent", arms:"knee"},
+  {n:"Unoszenie tułowia z jedną nogą ugiętą — ręce splecione na karku", legs:"one-bent", arms:"head"},
+  {n:"Unoszenie tułowia z obiema nogami ugiętymi — ręce splecione na karku", legs:"two-bent", arms:"head"},
+  {n:"Rowerek w unosie tułowia — ręce splecione na karku", legs:"cycle", arms:"head"},
+  {n:"Unoszenie tułowia z prostymi nogami — ręce splecione na karku", legs:"two-straight", arms:"head"},
+];
+const ORDINALS = ["pierwsze","drugie","trzecie","czwarte","piąte","szóste"];
+
+/* ---------- progresja 42-dniowa (oryginalny A6W) ---------- */
+const RANGE_TABLE = [
+  {from:1, to:1, series:1, reps:6},
+  {from:2, to:3, series:2, reps:6},
+  {from:4, to:6, series:3, reps:6},
+  {from:7, to:10, series:3, reps:8},
+  {from:11, to:14, series:3, reps:10},
+  {from:15, to:18, series:3, reps:12},
+  {from:19, to:22, series:3, reps:14},
+  {from:23, to:26, series:3, reps:16},
+  {from:27, to:30, series:3, reps:18},
+  {from:31, to:34, series:3, reps:20},
+  {from:35, to:38, series:3, reps:22},
+  {from:39, to:42, series:3, reps:24},
+];
+function defaultsForDay(day){
+  const row = RANGE_TABLE.find(r=>day>=r.from && day<=r.to) || RANGE_TABLE[RANGE_TABLE.length-1];
+  return { series: row.series, reps: row.reps };
+}
+function buildDefaultDays(){
+  const arr = [];
+  for(let d=1; d<=42; d++){
+    const def = defaultsForDay(d);
+    arr.push({ day:d, series:def.series, reps:def.reps, done:false });
+  }
+  return arr;
+}
+
+const DEFAULT_SETTINGS = { seriesRest: 180, exGap: 10, tempoMs: 1000 };
+
+/* ---------- storage ---------- */
+function loadDays(){
+  try{
+    const raw = localStorage.getItem('a6w_days_v3');
+    if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr) && arr.length===42) return arr; }
+    const rawOld = localStorage.getItem('a6w_days_v2');
+    if(rawOld){
+      const old = JSON.parse(rawOld);
+      if(Array.isArray(old) && old.length===42){
+        return old.map(d=>({day:d.day, series:d.series, reps:d.reps, done:!!d.done}));
+      }
+    }
+  }catch(e){}
+  return buildDefaultDays();
+}
+function saveDays(){ try{ localStorage.setItem('a6w_days_v3', JSON.stringify(state.days)); }catch(e){} }
+function loadSettings(){
+  try{ const raw = localStorage.getItem('a6w_settings_v2'); if(raw) return {...DEFAULT_SETTINGS, ...JSON.parse(raw)}; }catch(e){}
+  return {...DEFAULT_SETTINGS};
+}
+function saveSettings(){ try{ localStorage.setItem('a6w_settings_v2', JSON.stringify(state.settings)); }catch(e){} }
+
+let state = {
+  days: loadDays(),
+  settings: loadSettings(),
+  screen: 'days',
+  dayIndex: 0,
+  workout: null,
+};
+
+/* ---------- mowa ---------- */
+let plVoice = null;
+function pickVoice(){
+  const voices = speechSynthesis.getVoices ? speechSynthesis.getVoices() : [];
+  plVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('pl')) || null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text){
+  try{
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'pl-PL'; if(plVoice) u.voice = plVoice; u.rate = 1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- krótki sygnał dźwiękowy ---------- */
+let audioCtx = null;
+function ensureAudio(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+  }catch(e){}
+}
+function beep(freq, dur){
+  try{
+    ensureAudio(); if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.35, t0+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur/1000);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0+dur/1000+0.02);
+  }catch(e){}
+}
+
+/* ---------- ikony pozycji (leżenie na plecach; pose 'up' = uniesienie, 'down' = spoczynek) ---------- */
+function exIcon(ex, pose){
+  pose = pose || 'up';
+  const s = 'stroke="currentColor" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
+  const hip = {x:62,y:64};
+  const shoulder = {x:118,y:40};
+  const head = `<circle cx="126" cy="30" r="9" ${s}/>`;
+  const ground = `<line x1="4" y1="70" x2="150" y2="70" stroke="currentColor" stroke-width="2" opacity=".22" stroke-dasharray="2 5"/>`;
+  const headArms = `<path d="M124 24 L108 15 M129 25 L145 19" ${s}/>`;
+
+  function kneePoint(dx,dy){ return {x:hip.x-26+dx, y:hip.y-32+dy}; }
+  function footPoint(dx,dy){ return {x:hip.x-10+dx, y:hip.y-16+dy}; }
+  function bentLegPath(dx,dy,op){
+    const k=kneePoint(dx,dy), f=footPoint(dx,dy);
+    return `<path d="M${hip.x} ${hip.y} L${k.x} ${k.y} L${f.x} ${f.y}" ${s}${op?` opacity="${op}"`:''}/>`;
+  }
+  function straightLegPath(dx,dy,op){
+    const f = {x:hip.x-46+dx, y:hip.y-32+dy};
+    return `<path d="M${hip.x} ${hip.y} L${f.x} ${f.y}" ${s}${op?` opacity="${op}"`:''}/>`;
+  }
+
+  if(pose==='down'){
+    const torso = `<path d="M118 36 L${hip.x} ${hip.y}" ${s}/>`;
+    const legs = `<path d="M${hip.x} ${hip.y} L14 70" ${s}/>`;
+    const arms = ex.arms==='head' ? headArms : `<path d="M116 41 L100 57" ${s}/>`;
+    return `<svg class="stagesvg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">${ground}${legs}${torso}${arms}${head}</svg>`;
+  }
+
+  const torso = `<path d="M118 37 L${hip.x} ${hip.y}" ${s}/>`;
+  let legs = '', arms = '';
+  if(ex.legs==='one-bent'){
+    const k = kneePoint(0,0);
+    legs = bentLegPath(0,0) + `<path d="M${hip.x} ${hip.y} L${hip.x-30} ${hip.y+4}" ${s} opacity=".45"/>`;
+    arms = ex.arms==='head' ? headArms : `<path d="M${shoulder.x} ${shoulder.y} L${k.x} ${k.y}" ${s}/>`;
+  } else if(ex.legs==='two-bent'){
+    const k1=kneePoint(0,0), k2=kneePoint(4,6);
+    legs = bentLegPath(0,0) + bentLegPath(4,6,.5);
+    arms = ex.arms==='head' ? headArms : `<path d="M${shoulder.x} ${shoulder.y} L${k1.x} ${k1.y} M${shoulder.x} ${shoulder.y} L${k2.x} ${k2.y}" ${s}/>`;
+  } else if(ex.legs==='two-straight'){
+    legs = straightLegPath(0,0) + straightLegPath(4,6,.5);
+    arms = headArms;
+  } else if(ex.legs==='cycle'){
+    const k = kneePoint(0,0);
+    legs = bentLegPath(0,0) + `<path d="M${hip.x} ${hip.y} L${hip.x-34} ${hip.y-6}" ${s} opacity=".55"/>` +
+      `<path d="M18 20 A16 16 0 1 1 15 34" ${s} stroke-dasharray="3 5" opacity=".5"/>`;
+    arms = headArms;
+  }
+  return `<svg class="stagesvg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">${ground}${legs}${torso}${arms}${head}</svg>`;
+}
+
+/* ---------- render ---------- */
+const app = document.getElementById('app');
+function render(){
+  if(state.screen==='days') renderDays();
+  else if(state.screen==='detail') renderDetail();
+  else if(state.screen==='workout') renderWorkout();
+  else if(state.screen==='done') renderDone();
+}
+function nextTodoDayIndex(){
+  const i = state.days.findIndex(d=>!d.done);
+  return i===-1 ? state.days.length-1 : i;
+}
+function renderDays(){
+  const ni = nextTodoDayIndex();
+  const nd = state.days[ni];
+  const grid = state.days.map((d,i)=>{
+    let cls='daybtn'; if(d.done) cls+=' done'; if(i===ni && !d.done) cls+=' current';
+    return `<button class="${cls}" data-i="${i}">${d.day}</button>`;
+  }).join('');
+  app.innerHTML = `
+    <div class="topbar"><div class="brand">A6W<span>.</span></div></div>
+    <div class="intro">Aerobiczna Szóstka Weidera — 6 stałych ćwiczeń na brzuch. Wybierz dowolny dzień programu; ukończone dni są zaznaczone.</div>
+    <div class="continuecard" id="continueCard">
+      <div><div class="lbl">Kontynuuj</div><div class="day">Dzień ${nd.day} — ${nd.series}×${nd.reps}</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="daysgrid">${grid}</div>
+    <div class="legend"><span><span class="sw" style="background:var(--accent);"></span>ukończone</span><span><span class="sw" style="border:2px solid var(--rest);background:none;"></span>zalecany dziś</span></div>
+    <button class="ghostbtn" id="resetAll" style="margin-top:18px;">ZERUJ</button>
+  `;
+  document.getElementById('continueCard').addEventListener('click', ()=>{ state.dayIndex=ni; state.screen='detail'; render(); });
+  app.querySelectorAll('.daybtn').forEach(b=>{
+    b.addEventListener('click', ()=>{ state.dayIndex = +b.dataset.i; state.screen='detail'; render(); });
+  });
+  document.getElementById('resetAll').addEventListener('click', showResetConfirm);
+}
+function showResetConfirm(){
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:var(--panel);border:1px solid var(--panel-border);border-radius:16px;padding:20px;max-width:360px;text-align:center;">
+      <div style="font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;margin-bottom:10px;">Wyzerować wszystkie dni?</div>
+      <div style="font-size:13.5px;color:var(--text-dim);line-height:1.5;margin-bottom:18px;">Wszystkie zapisane wyniki zostaną utracone i program zacznie się od Dnia 1. Tej operacji nie można cofnąć.</div>
+      <div style="display:flex;gap:10px;">
+        <button id="resetCancel" class="ghostbtn" style="flex:1;">Anuluj</button>
+        <button id="resetOk" class="primarybtn" style="flex:1;margin-top:0;">OK</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#resetCancel').onclick = ()=> overlay.remove();
+  overlay.querySelector('#resetOk').onclick = ()=>{
+    state.days = buildDefaultDays();
+    saveDays();
+    state.dayIndex = 0;
+    overlay.remove();
+    render();
+  };
+}
+function renderDetail(){
+  const d = state.days[state.dayIndex];
+  const rows = EXERCISES.map((e,i)=>`
+    <div class="exrow">${exIcon(e)}<div class="exinfo"><div class="exname">${i+1}. ${e.n}</div></div></div>
+  `).join('');
+  app.innerHTML = `
+    <div class="topbar"><button class="backbtn" id="toDays">‹ Dni</button></div>
+    <h2>Dzień ${d.day}</h2>
+    <div class="planeditrow">
+      <label>Serie</label><input class="numfield" id="setSeries" type="number" min="1" max="10" value="${d.series}">
+      <label>Powt.</label><input class="numfield" id="setReps" type="number" min="1" max="60" value="${d.reps}">
+    </div>
+    <div class="exlist">${rows}</div>
+    <div class="settingsbox">
+      <h3>Tempo i przerwy</h3>
+      <div class="setrow"><span>Tempo liczenia „raz, dwa, trzy” (ms)</span><input class="numfield" id="setTempo" type="number" min="400" max="2000" step="50" value="${state.settings.tempoMs}"></div>
+      <div class="setrow"><span>Między seriami (sekundy)</span><input class="numfield" id="setSeriesRest" type="number" min="0" max="600" value="${state.settings.seriesRest}"></div>
+      <div class="setrow"><span>Między ćwiczeniami (sekundy)</span><input class="numfield" id="setExGap" type="number" min="0" max="60" value="${state.settings.exGap}"></div>
+      <div class="setnote">Podczas ćwiczenia aplikacja mówi, które ćwiczenie wykonujesz, a potem na głos liczy „raz, dwa, trzy” dla każdego powtórzenia — osobno dla lewej i prawej nogi w ćwiczeniach naprzemiennych — z krótkim sygnałem dźwiękowym na opuszczenie nóg. Nie trzeba patrzeć na ekran. Oryginalny A6W zaleca 3 min przerwy między seriami i brak przerwy między ćwiczeniami.</div>
+    </div>
+    <button class="primarybtn" id="startWorkout">Rozpocznij trening</button>
+    ${d.done ? `<button class="ghostbtn" style="margin-top:10px;" id="unmark">Odznacz jako ukończone</button>` : ''}
+  `;
+  document.getElementById('toDays').onclick = ()=>{ state.screen='days'; render(); };
+  document.getElementById('setSeries').addEventListener('change', e=>{ d.series = Math.max(1,parseInt(e.target.value)||1); saveDays(); });
+  document.getElementById('setReps').addEventListener('change', e=>{ d.reps = Math.max(1,parseInt(e.target.value)||1); saveDays(); });
+  document.getElementById('setTempo').addEventListener('change', e=>{ state.settings.tempoMs = Math.max(400,parseInt(e.target.value)||900); saveSettings(); });
+  document.getElementById('setSeriesRest').addEventListener('change', e=>{ state.settings.seriesRest = Math.max(0,parseInt(e.target.value)||0); saveSettings(); });
+  document.getElementById('setExGap').addEventListener('change', e=>{ state.settings.exGap = Math.max(0,parseInt(e.target.value)||0); saveSettings(); });
+  document.getElementById('startWorkout').onclick = ()=> startWorkout();
+  const um = document.getElementById('unmark');
+  if(um) um.onclick = ()=>{ d.done=false; saveDays(); renderDetail(); };
+}
+
+/* ---------- silnik treningu ---------- */
+let timerHandle = null; // setInterval dla przerw (gap_ex / rest_series)
+function clearTimerHandle(){ if(timerHandle){ clearInterval(timerHandle); timerHandle=null; } }
+
+function startWorkout(){
+  ensureAudio();
+  const d = state.days[state.dayIndex];
+  const totalMs = estimateTotalMs(d, state.settings.tempoMs, state.settings.exGap, state.settings.seriesRest);
+  state.workout = {
+    d, serie:1, exIndex:0, phase:'work', remaining:0, paused:false, repIndex:1, currentDisplay:'', currentPose:'down',
+    stepTimer:null, steps:[], stepIdx:0, totalMs, startTs:Date.now(), pausedAccum:0, pauseStart:null,
+  };
+  state.screen = 'workout';
+  render();
+  startMasterClock();
+  announceCurrent(true);
+  startExerciseCadence();
+}
+function exerciseAnnouncement(serieNum, exIdx, prefix){
+  const w = state.workout;
+  return `${prefix||''}Seria ${serieNum} z ${w.d.series}. Ćwiczenie ${ORDINALS[exIdx]||(exIdx+1)}.`;
+}
+function announceCurrent(isFirst){
+  const w = state.workout;
+  say(exerciseAnnouncement(w.serie, w.exIndex, isFirst ? 'Start. ' : ''));
+}
+
+/* ---- budowanie sekwencji dźwiękowej dla jednego ćwiczenia (wszystkie powtórzenia) ---- */
+function buildExerciseSteps(ex, reps, tempoMs){
+  const steps = [];
+  const t1 = tempoMs; // odstęp między "raz", "dwa", "trzy" — domyślnie 1000 ms (sekundy)
+  const LOWER_PAUSE = 1000; // czas na odłożenie/zmianę nogi po sygnale dźwiękowym
+  function pushHold(label, r){
+    if(label) steps.push({type:'say', text:label, big:label, pose:'up', rep:r, delay:700});
+    steps.push({type:'say', text:'Raz', big:'1', pose:'up', rep:r, delay:t1});
+    steps.push({type:'say', text:'Dwa', big:'2', pose:'up', rep:r, delay:t1});
+    steps.push({type:'say', text:'Trzy', big:'3', pose:'up', rep:r, delay:t1});
+    steps.push({type:'beep', big:'', pose:'down', rep:r, delay:LOWER_PAUSE});
+  }
+  if(ex.legs==='one-bent'){
+    for(let r=1;r<=reps;r++){ pushHold('Noga lewa', r); pushHold('Noga prawa', r); }
+  } else if(ex.legs==='cycle'){
+    // Rowerek: uniesienie i zgięcie jednej nogi o 90° na czas liczenia, druga noga prosto nad podłogą;
+    // jedna zmiana nogi lewej i prawej = jedno powtórzenie.
+    let sideCount = 0;
+    for(let r=1;r<=reps;r++){
+      pushHold(sideCount===0 ? 'Lewa noga' : 'Zmiana nogi', r); sideCount++;
+      pushHold('Zmiana nogi', r); sideCount++;
+    }
+  } else {
+    for(let r=1;r<=reps;r++) pushHold(null, r);
+  }
+  steps.unshift({type:'wait', big:'', pose:'down', rep:1, delay:2400});
+  return steps;
+}
+function estimateTotalMs(d, tempoMs, exGapSec, seriesRestSec){
+  let total = 0;
+  for(let s=1; s<=d.series; s++){
+    for(let i=0; i<EXERCISES.length; i++){
+      const steps = buildExerciseSteps(EXERCISES[i], d.reps, tempoMs);
+      total += steps.reduce((a,st)=>a+st.delay,0);
+      if(i<EXERCISES.length-1) total += exGapSec*1000;
+    }
+    if(s<d.series) total += seriesRestSec*1000;
+  }
+  return total;
+}
+
+function startExerciseCadence(){
+  const w = state.workout;
+  const ex = EXERCISES[w.exIndex];
+  w.phase = 'work';
+  w.steps = buildExerciseSteps(ex, w.d.reps, state.settings.tempoMs);
+  w.stepIdx = 0; w.repIndex = 1; w.currentDisplay = '';
+  renderWorkout();
+  stepNext();
+}
+function stepNext(){
+  const w = state.workout; if(!w || w.phase!=='work') return;
+  if(w.stepIdx >= w.steps.length){ finishExercise(); return; }
+  const st = w.steps[w.stepIdx]; w.stepIdx++;
+  w.repIndex = st.rep; w.currentDisplay = st.big; w.currentPose = st.pose || 'up';
+  if(st.type==='say') say(st.text);
+  else if(st.type==='beep') beep(880,120);
+  else if(st.type==='beep2') beep(600,220);
+  renderTimerOnly(); renderStatsOnly(); renderIconOnly();
+  scheduleNext(stepNext, st.delay);
+}
+function scheduleNext(fn, delay){
+  const w = state.workout;
+  w.pendingFn = fn;
+  w.stepTimer = setTimeout(()=>{ if(!w.paused) fn(); }, delay);
+}
+
+function beginCountdown(seconds, kind, onDone){
+  const w = state.workout;
+  w.phase = kind; w.remaining = seconds; w.endsAt = Date.now()+seconds*1000; w.onDone = onDone;
+  clearTimerHandle(); renderWorkout();
+  if(seconds<=0){ onDone(); return; }
+  let lastSpoken = null;
+  timerHandle = setInterval(()=>{
+    if(w.paused) return;
+    const left = Math.max(0, Math.ceil((w.endsAt-Date.now())/1000));
+    w.remaining = left;
+    if(left<=3 && left>=1 && left!==lastSpoken){ lastSpoken=left; say(String(left)); }
+    renderTimerOnly();
+    if(left<=0){ clearTimerHandle(); const cb=w.onDone; cb && cb(); }
+  }, 200);
+}
+
+function finishExercise(){
+  const w = state.workout;
+  if(w.exIndex < EXERCISES.length-1){
+    const gap = state.settings.exGap;
+    say('Zmiana ćwiczenia. ' + exerciseAnnouncement(w.serie, w.exIndex+1));
+    beginCountdown(gap, 'gap_ex', ()=>{
+      w.exIndex += 1; renderWorkout(); startExerciseCadence();
+    });
+  } else {
+    if(w.serie < w.d.series){
+      const rest = state.settings.seriesRest;
+      const mins = Math.floor(rest/60), secs = rest%60;
+      const restMsg = rest>0 ? `Przerwa. ${mins>0? mins+' minuty. ':''}${secs>0? secs+' sekund.':''}` : 'Kolejna seria.';
+      say(restMsg + ' ' + exerciseAnnouncement(w.serie+1, 0));
+      beginCountdown(rest, 'rest_series', ()=>{
+        w.serie += 1; w.exIndex = 0; renderWorkout(); startExerciseCadence();
+      });
+    } else {
+      w.d.done = true; saveDays();
+      stopMasterClock();
+      say('Trening zakończony. Gratulacje.');
+      state.screen='done'; render();
+    }
+  }
+}
+
+function togglePause(){
+  const w = state.workout; if(!w) return;
+  if(!w.paused){
+    w.paused = true; w.pauseStart = Date.now();
+    if(w.phase==='work'){ if(w.stepTimer) clearTimeout(w.stepTimer); } else { w.pauseRemainingMs = w.endsAt-Date.now(); }
+    say('Pauza');
+  } else {
+    w.paused = false;
+    w.pausedAccum = (w.pausedAccum||0) + (Date.now()-w.pauseStart); w.pauseStart = null;
+    if(w.phase==='work'){ w.stepTimer = setTimeout(()=>{ if(w.pendingFn) w.pendingFn(); }, 300); }
+    else { w.endsAt = Date.now()+Math.max(0,w.pauseRemainingMs); }
+    say('Start');
+  }
+  renderWorkout();
+}
+function skipPhase(){
+  const w = state.workout; if(!w) return;
+  if(w.phase==='work'){
+    if(w.stepTimer) clearTimeout(w.stepTimer);
+    let remainingMs = 0;
+    for(let i=w.stepIdx; i<w.steps.length; i++) remainingMs += w.steps[i].delay;
+    w.totalMs = Math.max(0, (w.totalMs||0) - remainingMs);
+    finishExercise();
+  } else {
+    w.totalMs = Math.max(0, (w.totalMs||0) - (w.remaining*1000));
+    clearTimerHandle(); const cb=w.onDone; cb && cb();
+  }
+}
+
+function renderTimerOnly(){
+  const el = document.getElementById('timerNum'); if(!el) return;
+  const w = state.workout;
+  if(w.phase==='work'){
+    el.textContent = w.currentDisplay || '';
+    const isWord = w.currentDisplay && isNaN(w.currentDisplay) && w.currentDisplay.length>2;
+    el.className = 'timerbig work' + (isWord?' wordmode':'');
+  } else {
+    el.textContent = fmtTime(w.remaining);
+    el.className = 'timerbig ' + (w.remaining<=3?'warn':'rest');
+  }
+}
+function renderIconOnly(){
+  const w = state.workout; if(!w) return;
+  const el = document.getElementById('poseIcon'); if(!el) return;
+  el.innerHTML = exIcon(EXERCISES[w.exIndex], w.phase==='work' ? (w.currentPose||'up') : 'down');
+}
+function renderStatsOnly(){
+  const w = state.workout; if(!w) return;
+  const repEl = document.getElementById('statRep');
+  if(repEl) repEl.textContent = (w.phase==='work' ? w.repIndex : '-') + '/' + w.d.reps;
+}
+function statsRowHtml(w){
+  const rep = w.phase==='work' ? w.repIndex : '-';
+  return `
+    <div class="statsrow">
+      <div class="statitem"><div class="statval" id="czasVal">~0:00</div><div class="statlbl">Czas</div></div>
+      <div class="statitem"><div class="statval">${w.serie}/${w.d.series}</div><div class="statlbl">Seria</div></div>
+      <div class="statitem"><div class="statval">${w.exIndex+1}/${EXERCISES.length}</div><div class="statlbl">Ćwiczenie</div></div>
+      <div class="statitem"><div class="statval" id="statRep">${rep}/${w.d.reps}</div><div class="statlbl">Powt.</div></div>
+    </div>`;
+}
+let masterClockHandle = null;
+function startMasterClock(){ stopMasterClock(); masterClockHandle = setInterval(updateLiveStats, 400); }
+function stopMasterClock(){ if(masterClockHandle){ clearInterval(masterClockHandle); masterClockHandle=null; } }
+function updateLiveStats(){
+  const w = state.workout; if(!w || !w.totalMs) return;
+  const pausedNow = w.paused ? (Date.now()-w.pauseStart) : 0;
+  const elapsed = Date.now()-w.startTs-(w.pausedAccum||0)-pausedNow;
+  const remMs = Math.max(0, w.totalMs-elapsed);
+  const czasEl = document.getElementById('czasVal');
+  if(czasEl) czasEl.textContent = '~'+fmtTime(Math.ceil(remMs/1000));
+  const barEl = document.getElementById('overallBar');
+  if(barEl){ const frac = Math.min(1, Math.max(0, elapsed/w.totalMs)); barEl.style.width = (frac*100)+'%'; }
+}
+function fmtTime(sec){ const m=Math.floor(sec/60), s=sec%60; return m>0? m+':'+String(s).padStart(2,'0') : String(s); }
+
+function renderWorkout(){
+  const w = state.workout;
+  const e = EXERCISES[w.exIndex];
+  const isWork = w.phase==='work';
+  const pose = isWork ? (w.currentPose||'up') : 'down';
+
+  let phaseLabel, hint, timerContent;
+  if(isWork){
+    phaseLabel = '';
+    hint = '';
+    const isWord = w.currentDisplay && isNaN(w.currentDisplay) && w.currentDisplay.length>2;
+    timerContent = `<div class="timerbig work${isWord?' wordmode':''}" id="timerNum">${w.currentDisplay||''}</div>`;
+  } else if(w.phase==='rest_series'){
+    phaseLabel='Przerwa między seriami';
+    hint = w.remaining<=3?'Zaraz start!':`Następna: seria ${w.serie+1} z ${w.d.series}`;
+    timerContent = `<div class="timerbig ${w.remaining<=3?'warn':'rest'}" id="timerNum">${fmtTime(w.remaining)}</div>`;
+  } else {
+    phaseLabel='Zmiana ćwiczenia';
+    hint = w.remaining<=3?'Zaraz start!':`Za chwilę: ${EXERCISES[w.exIndex+1]?EXERCISES[w.exIndex+1].n:''}`;
+    timerContent = `<div class="timerbig ${w.remaining<=3?'warn':'rest'}" id="timerNum">${fmtTime(w.remaining)}</div>`;
+  }
+
+  app.innerHTML = `
+    <div class="topbar"><button class="backbtn" id="exitWorkout">‹ Zakończ</button></div>
+    <div class="stage">
+      ${statsRowHtml(w)}
+      ${phaseLabel ? `<div class="phaselabel">${phaseLabel}</div>` : ''}
+      <div class="exhero">${e.n}</div>
+      <div id="poseIcon">${exIcon(e, pose)}</div>
+      ${timerContent}
+      <div class="timerhint">${hint}</div>
+      <div class="overallwrap"><div class="overallbar" id="overallBar"></div></div>
+      <div class="ctrlrow">
+        <button class="ghostbtn" id="pauseBtn" style="flex:1;">${w.paused?'Wznów':'Pauza'}</button>
+        <button class="ghostbtn" id="skipBtn" style="flex:1;">${isWork?'Zakończ ćwiczenie':'Pomiń'}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('exitWorkout').onclick = ()=>{
+    clearTimerHandle();
+    if(state.workout && state.workout.stepTimer) clearTimeout(state.workout.stepTimer);
+    stopMasterClock();
+    if('speechSynthesis' in window) speechSynthesis.cancel();
+    state.screen='detail'; render();
+  };
+  document.getElementById('pauseBtn').onclick = togglePause;
+  document.getElementById('skipBtn').onclick = skipPhase;
+  updateLiveStats();
+}
+
+function renderDone(){
+  const d = state.days[state.dayIndex];
+  const hasNext = state.dayIndex < state.days.length-1;
+  app.innerHTML = `
+    <div class="topbar"><div class="brand">A6W<span>.</span></div></div>
+    <div class="donewrap">
+      <h2>Trening zakończony 💪</h2>
+      <p>Dzień ${d.day} — zaliczony</p>
+      ${hasNext ? `<button class="primarybtn" id="nextDay">Przejdź do: Dzień ${state.days[state.dayIndex+1].day}</button>` : `<p>To był ostatni dzień programu — gratulacje!</p>`}
+      <button class="ghostbtn" style="margin-top:10px;" id="backToDays">Wróć do listy dni</button>
+    </div>
+  `;
+  if(hasNext) document.getElementById('nextDay').onclick = ()=>{ state.dayIndex += 1; state.screen='detail'; render(); };
+  document.getElementById('backToDays').onclick = ()=>{ state.screen='days'; render(); };
+}
+
+render();
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
