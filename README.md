@@ -8,7 +8,7 @@
 
 1. Otwórz powyższy link w **Safari** (musi być Safari, nie Chrome ani inna przeglądarka).
 2. Stuknij ikonę trzech kresek na dole ekranu (obok paska adresu) i kliknij Udostępnij.
-3. Przewiń listę w dół i wybierz **„Dodaj do ekranu początkowego”**.
+3. Przewiń listę w dół (lub kliknij Pokaż więcej) i wybierz **„Dodaj do ekranu początkowego”**.
 4. Zatwierdź nazwę i stuknij **„Dodaj”** w prawym górnym rogu.
 5. Na ekranie głównym pojawi się ikonka A6W — uruchamiaj aplikację z niej, nie z przeglądarki.
 
