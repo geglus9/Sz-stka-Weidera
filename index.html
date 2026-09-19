@@ -232,51 +232,65 @@ function beep(freq, dur){
 /* ---------- ikony pozycji (leżenie na plecach; pose 'up' = uniesienie, 'down' = spoczynek) ---------- */
 function exIcon(ex, pose){
   pose = pose || 'up';
-  const s = 'stroke="currentColor" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
-  const hip = {x:62,y:64};
-  const shoulder = {x:118,y:40};
-  const head = `<circle cx="126" cy="30" r="9" ${s}/>`;
-  const ground = `<line x1="4" y1="70" x2="150" y2="70" stroke="currentColor" stroke-width="2" opacity=".22" stroke-dasharray="2 5"/>`;
-  const headArms = `<path d="M124 24 L108 15 M129 25 L145 19" ${s}/>`;
+  const SKIN='#E3B08C', SKIN_DK='#C99B78', SHIRT='#4A8FCB', SHORTS='#20232A', SHOE='#20232A', HAIR='#241F1A', MAT='#8781A8';
+  const GY = 76; // poziom podłoża
+  const hip = {x:64, y:GY};
+  const shoulderY = pose==='up' ? GY-16 : GY-2; // w spoczynku plecy płasko na macie, przy uniesieniu tylko niewielkie oderwanie
+  const shoulder = {x:112, y:shoulderY};
+  const headC = {x:120, y:shoulderY-14};
+  const LW=15, AW=12;
+  function seg(x1,y1,x2,y2,color,w,op){ return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"${op?` opacity="${op}"`:''}/>`; }
+  function seg2(x1,y1,x2,y2,x3,y3,color,w,op){ return `<path d="M${x1} ${y1} L${x2} ${y2} L${x3} ${y3}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"${op?` opacity="${op}"`:''}/>`; }
+  function dot(x,y,r,color,op){ return `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}"${op?` opacity="${op}"`:''}/>`; }
+  function shoeEl(x,y,angle,op){ return `<ellipse cx="${x}" cy="${y}" rx="10" ry="6" fill="${SHOE}" transform="rotate(${angle} ${x} ${y})"${op?` opacity="${op}"`:''}/>`; }
+  const mat = `<path d="M2 80 L96 64 L158 72 L64 98 Z" fill="${MAT}" opacity=".22"/>`;
 
-  function kneePoint(dx,dy){ return {x:hip.x-26+dx, y:hip.y-32+dy}; }
-  function footPoint(dx,dy){ return {x:hip.x-10+dx, y:hip.y-16+dy}; }
-  function bentLegPath(dx,dy,op){
-    const k=kneePoint(dx,dy), f=footPoint(dx,dy);
-    return `<path d="M${hip.x} ${hip.y} L${k.x} ${k.y} L${f.x} ${f.y}" ${s}${op?` opacity="${op}"`:''}/>`;
+  // udo pionowo w górę, podudzie poziomo (kąt 90° w kolanie)
+  function bentLeg(dx,dy,op){
+    const knee = {x:hip.x+dx, y:GY-36+dy};
+    const foot = {x:hip.x-34+dx, y:knee.y};
+    return seg2(hip.x,hip.y,knee.x,knee.y,foot.x,foot.y,op?SKIN_DK:SKIN,LW,op)+shoeEl(foot.x-2,foot.y+2,-8,op);
   }
-  function straightLegPath(dx,dy,op){
-    const f = {x:hip.x-46+dx, y:hip.y-32+dy};
-    return `<path d="M${hip.x} ${hip.y} L${f.x} ${f.y}" ${s}${op?` opacity="${op}"`:''}/>`;
+  function straightLegFlat(dx,dy,op){ // noga płasko na macie (spoczynek / druga noga w ćwiczeniu z jedną nogą ugiętą)
+    const foot = {x:hip.x-46+dx, y:GY+dy};
+    return seg(hip.x,hip.y,foot.x,foot.y,op?SKIN_DK:SKIN,LW,op)+shoeEl(foot.x-2,foot.y-1,4,op);
   }
+  function straightLegLow(dx,dy,op){ // noga prosto, ok. 15 cm nad podłogą (rowerek)
+    const foot = {x:hip.x-46+dx, y:GY-8+dy};
+    return seg(hip.x,hip.y,foot.x,foot.y,op?SKIN_DK:SKIN,LW,op)+shoeEl(foot.x-2,foot.y-1,8,op);
+  }
+  function straightLegHigh(dx,dy,op){ // obie nogi proste uniesione wysoko
+    const foot = {x:hip.x-44+dx, y:GY-34+dy};
+    return seg(hip.x,hip.y,foot.x,foot.y,op?SKIN_DK:SKIN,LW,op)+shoeEl(foot.x-2,foot.y-1,30,op);
+  }
+
+  const shorts = `<circle cx="${hip.x}" cy="${hip.y}" r="13" fill="${SHORTS}"/>`;
+  const neck = seg(headC.x-2,headC.y+9,shoulder.x,shoulder.y,SKIN,10);
+  const head = dot(headC.x,headC.y,11,SKIN) + `<path d="M${headC.x-11} ${headC.y-2} A11 11 0 0 1 ${headC.x+7} ${headC.y-9} Q${headC.x-2} ${headC.y-13} ${headC.x-11} ${headC.y-2} Z" fill="${HAIR}"/>`;
+  const headArms = seg(shoulder.x,shoulder.y,headC.x-2,headC.y-6,SKIN,AW) + seg(shoulder.x-4,shoulder.y-2,headC.x+10,headC.y-2,SKIN,AW);
+  const torso = seg(shoulder.x,shoulder.y,hip.x,hip.y,SHIRT,20);
 
   if(pose==='down'){
-    const torso = `<path d="M118 36 L${hip.x} ${hip.y}" ${s}/>`;
-    const legs = `<path d="M${hip.x} ${hip.y} L14 70" ${s}/>`;
-    const arms = ex.arms==='head' ? headArms : `<path d="M116 41 L100 57" ${s}/>`;
-    return `<svg class="stagesvg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">${ground}${legs}${torso}${arms}${head}</svg>`;
+    const legs = straightLegFlat(0,0);
+    const arms = ex.arms==='head' ? headArms : seg(shoulder.x,shoulder.y,shoulder.x-16,shoulder.y+14,SKIN,AW);
+    return `<svg class="stagesvg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">${mat}${legs}${torso}${shorts}${arms}${neck}${head}</svg>`;
   }
 
-  const torso = `<path d="M118 37 L${hip.x} ${hip.y}" ${s}/>`;
-  let legs = '', arms = '';
+  let farLeg='', nearLeg='', arms='';
   if(ex.legs==='one-bent'){
-    const k = kneePoint(0,0);
-    legs = bentLegPath(0,0) + `<path d="M${hip.x} ${hip.y} L${hip.x-30} ${hip.y+4}" ${s} opacity=".45"/>`;
-    arms = ex.arms==='head' ? headArms : `<path d="M${shoulder.x} ${shoulder.y} L${k.x} ${k.y}" ${s}/>`;
+    farLeg = straightLegFlat(0,0,.6); nearLeg = bentLeg(0,0);
+    arms = ex.arms==='head' ? headArms : (()=>{ const k={x:hip.x,y:GY-36}; return seg(shoulder.x,shoulder.y,k.x,k.y,SKIN,AW)+dot(k.x,k.y,7,SKIN); })();
   } else if(ex.legs==='two-bent'){
-    const k1=kneePoint(0,0), k2=kneePoint(4,6);
-    legs = bentLegPath(0,0) + bentLegPath(4,6,.5);
-    arms = ex.arms==='head' ? headArms : `<path d="M${shoulder.x} ${shoulder.y} L${k1.x} ${k1.y} M${shoulder.x} ${shoulder.y} L${k2.x} ${k2.y}" ${s}/>`;
+    farLeg = bentLeg(6,4,.55); nearLeg = bentLeg(0,0);
+    arms = ex.arms==='head' ? headArms : (()=>{ const k1={x:hip.x,y:GY-36}, k2={x:hip.x+6,y:GY-32}; return seg(shoulder.x,shoulder.y,k2.x,k2.y,SKIN,AW,.6)+seg(shoulder.x,shoulder.y,k1.x,k1.y,SKIN,AW)+dot(k1.x,k1.y,7,SKIN); })();
   } else if(ex.legs==='two-straight'){
-    legs = straightLegPath(0,0) + straightLegPath(4,6,.5);
+    farLeg = straightLegHigh(4,4,.55); nearLeg = straightLegHigh(0,0);
     arms = headArms;
   } else if(ex.legs==='cycle'){
-    const k = kneePoint(0,0);
-    legs = bentLegPath(0,0) + `<path d="M${hip.x} ${hip.y} L${hip.x-34} ${hip.y-6}" ${s} opacity=".55"/>` +
-      `<path d="M18 20 A16 16 0 1 1 15 34" ${s} stroke-dasharray="3 5" opacity=".5"/>`;
+    farLeg = straightLegLow(0,0,.6); nearLeg = bentLeg(0,0);
     arms = headArms;
   }
-  return `<svg class="stagesvg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">${ground}${legs}${torso}${arms}${head}</svg>`;
+  return `<svg class="stagesvg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">${mat}${farLeg}${torso}${shorts}${nearLeg}${arms}${neck}${head}</svg>`;
 }
 
 /* ---------- render ---------- */
@@ -403,22 +417,24 @@ function buildExerciseSteps(ex, reps, tempoMs){
   const steps = [];
   const t1 = tempoMs; // odstęp między "raz", "dwa", "trzy" — domyślnie 1000 ms (sekundy)
   const LOWER_PAUSE = 1000; // czas na odłożenie/zmianę nogi po sygnale dźwiękowym
-  function pushHold(label, r){
+  function pushHold(label, r, keepUp){
     if(label) steps.push({type:'say', text:label, big:label, pose:'up', rep:r, delay:700});
     steps.push({type:'say', text:'Raz', big:'1', pose:'up', rep:r, delay:t1});
     steps.push({type:'say', text:'Dwa', big:'2', pose:'up', rep:r, delay:t1});
     steps.push({type:'say', text:'Trzy', big:'3', pose:'up', rep:r, delay:t1});
-    steps.push({type:'beep', big:'', pose:'down', rep:r, delay:LOWER_PAUSE});
+    steps.push({type:'beep', big:'', pose: keepUp?'up':'down', rep:r, delay:LOWER_PAUSE});
   }
   if(ex.legs==='one-bent'){
     for(let r=1;r<=reps;r++){ pushHold('Noga lewa', r); pushHold('Noga prawa', r); }
   } else if(ex.legs==='cycle'){
     // Rowerek: uniesienie i zgięcie jednej nogi o 90° na czas liczenia, druga noga prosto nad podłogą;
-    // jedna zmiana nogi lewej i prawej = jedno powtórzenie.
+    // plecy pozostają uniesione przez całe ćwiczenie (opadają dopiero po jego zakończeniu).
+    // Jedna zmiana nogi lewej i prawej = jedno powtórzenie.
     let sideCount = 0;
     for(let r=1;r<=reps;r++){
-      pushHold(sideCount===0 ? 'Lewa noga' : 'Zmiana nogi', r); sideCount++;
-      pushHold('Zmiana nogi', r); sideCount++;
+      const isLast = (r===reps);
+      pushHold(sideCount===0 ? 'Lewa noga' : 'Zmiana nogi', r, true); sideCount++;
+      pushHold('Zmiana nogi', r, !isLast); sideCount++;
     }
   } else {
     for(let r=1;r<=reps;r++) pushHold(null, r);
